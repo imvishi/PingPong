@@ -9,8 +9,8 @@
  * wall.addWalls()
  */
 class Wall {
-    constructor(margin) {
-        this.strokeSize = 10
+    constructor(margin, strokeSize) {
+        this.strokeSize = strokeSize
         this.walls = []
         //Top and bottom walls
         this.verticalWallsPositionX = window.innerWidth/2
@@ -58,6 +58,8 @@ class Wall {
         World.add(engine.world, this.walls);
     }
 }
+const margin = 200
+const strokeSize = 10
 var Engine = Matter.Engine,
     Render = Matter.Render,
     World = Matter.World,
@@ -70,15 +72,11 @@ var render = Render.create({
     element: document.body,
     engine: engine,
     options: {
-        width:window.innerWidth,
-        height:window.innerHeight,
+        width:window.innerWidth- margin/2,
+        height:window.innerHeight- margin/2,
         wireframes:false,
     }
 });
-var batA = Bodies.rectangle(400,200,30,200, { isStatic: true});
-var batB = Bodies.rectangle(1200,200,30,200, {isStatic: true});
-var ball = Bodies.circle(580,100,40,10);
-ball.restitution = 1.0
 
 var downAndRotateLeft = {"ArrowDown":false,"ArrowLeft":false}
 var downAndRotateRight = {"ArrowDown":false,"ArrowRight":false}
@@ -91,7 +89,7 @@ document.onkeydown = function() {
     if (keyPressed in downAndRotateLeft) {
         downAndRotateLeft[keyPressed] = true
         if (downAndRotateLeft["ArrowDown"] == true && downAndRotateLeft["ArrowLeft"] == true) {
-            Body.translate(batA, {x:0,y:15})
+            Body.translate(batA, {x:0,y:25})
             Body.rotate(batA,-0.3)
             isKeyPressed = true
         }
@@ -99,7 +97,7 @@ document.onkeydown = function() {
     if (keyPressed in downAndRotateRight) {
         downAndRotateRight[keyPressed] = true
         if (downAndRotateRight["ArrowDown"] == true && downAndRotateRight["ArrowRight"] == true) {
-            Body.translate(batA, {x:0,y:15})
+            Body.translate(batA, {x:0,y:25})
             Body.rotate(batA,0.3)
             isKeyPressed = true
         }
@@ -107,7 +105,7 @@ document.onkeydown = function() {
     if (keyPressed in upAndRotateLeft) {
         upAndRotateLeft[keyPressed] = true
         if (upAndRotateLeft["ArrowUp"] == true && upAndRotateLeft["ArrowLeft"] == true) {
-            Body.translate(batA, {x:0,y:-15})
+            Body.translate(batA, {x:0,y:-25})
             Body.rotate(batA,-0.3)
             isKeyPressed = true
         }
@@ -115,7 +113,7 @@ document.onkeydown = function() {
     if (keyPressed in upAndRotateRight) {
         upAndRotateRight[keyPressed] = true
         if (upAndRotateRight["ArrowUp"] == true && upAndRotateRight["ArrowRight"] == true) {
-            Body.translate(batA, {x:0,y:-15})
+            Body.translate(batA, {x:0,y:-25})
             Body.rotate(batA,0.3)
             isKeyPressed = true
         }
@@ -123,10 +121,10 @@ document.onkeydown = function() {
     if (isKeyPressed == false) {
         switch(keyPressed) {
             case "ArrowUp":
-                Body.translate(batA, {x:0,y:-15})
+                Body.translate(batA, {x:0,y:-25})
                 break
             case "ArrowDown":
-                Body.translate(batA, {x:0,y:15})
+                Body.translate(batA, {x:0,y:25})
                 break
             case "ArrowLeft":
                 Body.rotate(batA,-0.3)
@@ -137,6 +135,7 @@ document.onkeydown = function() {
         }
     }
 }
+
 document.onkeyup = function() {
     isKeyPressed = false
     downAndRotateRight["ArrowDown"] = false
@@ -149,9 +148,19 @@ document.onkeyup = function() {
     upAndRotateLeft["ArrowLeft"] = false
 }
 //Add walls to the world
-const walls = new Wall(200)
+const walls = new Wall(margin, strokeSize)
 walls.addWalls()
 
+var batA = Bodies.rectangle(400,margin*2,30,200, { isStatic: true});
+var batB = Bodies.rectangle(1200,200,30,200, {isStatic: true});
+
+var ball = Bodies.circle(480,margin+strokeSize,20, {restitution: 1.0, inertia: Infinity, frictionAir: 0, inverseInertia: 0 });
+
+//Move batB
+Event.on(engine, 'beforeUpdate', function(event) {
+    console.log(batA.bounds.max.y)
+    Body.setPosition(batB, {x: batB.position.x, y: ball.position.y})
+});
 World.add(engine.world, batA);
 World.add(engine.world, batB);
 World.add(engine.world, ball);
